@@ -100,16 +100,19 @@ function ipv4_to_procfs() {
 
 # ipv4_get_addr_global() - Print first global IPv4 address reported by netlink
 # $1:	Optional output of 'ip -j -4 address show' from a different context
+# $2:   interface name
 function ipv4_get_addr_global() {
-    local expr='[.[].addr_info[] | select(.scope=="global")] | .[0].local'
-    echo "${1:-$(ip -j -4 address show)}" | jq -rM "${expr}"
+    local expr='[.[].addr_info[] | select(.scope=="global") | .local] | sort | .[]'
+    local ifname=${2:+dev $2}
+    echo "${1:-$(ip -j -4 address show $ifname)}" | jq -rM "${expr}"
 }
 
 # ipv6_get_addr_global() - Print first global IPv6 address reported by netlink
 # $1:	Optional output of 'ip -j -6 address show' from a different context
 function ipv6_get_addr_global() {
-    local expr='[.[].addr_info[] | select(.scope=="global")] | .[0].local'
-    echo "${1:-$(ip -j -6 address show)}" | jq -rM "${expr}"
+    local expr='[.[].addr_info[] | select(.scope=="global") | .local] | sort | .[]'
+    local ifname=${2:+dev $2}
+    echo "${1:-$(ip -j -6 address show $ifname)}" | jq -rM "${expr}"
 }
 
 # random_rfc1918_subnet() - Pseudorandom unused subnet in 172.16/12 prefix
